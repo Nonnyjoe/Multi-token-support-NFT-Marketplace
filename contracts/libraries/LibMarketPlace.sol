@@ -153,24 +153,24 @@ library LibMarketPlace {
     function setUp() internal returns (bool) {
         MarketStorage storage ds = MarketSlot();
         ds.priceFeedDai = AggregatorV3Interface(
-            0xAed0c38402a5d19df6E4c03F4E2DceD6e29c1ee9
+            0x0d79df66BE487753B02D015Fb622DED7f0E9798d
         );
         ds.priceFeedEth = AggregatorV3Interface(
-            0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419
+            0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e
         );
-        ds.priceFeedUni = AggregatorV3Interface(
-            0x553303d460EE0afB37EdFf9bE42922D8FF63220e
+        ds.priceFeedLink = AggregatorV3Interface(
+            0x48731cF7e84dc94C5f84577882c14Be11a5B7456
         );
-        ds.priceFeedBusd = AggregatorV3Interface(
+        ds.priceFeedUSDC = AggregatorV3Interface(
             0x833D8Eb16D306ed1FbB5D7A2E019e106B960965A
         );
-        ds.priceFeedUsdt = AggregatorV3Interface(
-            0x3E7d1eAB13ad0104d2750B8863b489D65364e32D
+        ds.priceFeedBTC = AggregatorV3Interface(
+            0xA39434A63A52E749F02807ae27335515BA4b07F7
         );
-        ds.Uni = address(0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984);
+        ds.Link = address(0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984);
         ds.Dai = address(0x6B175474E89094C44Da98b954EedeAC495271d0F);
-        ds.Busd = address(0x4Fabb145d64652a948d72533023f6E7A623C7C53);
-        ds.Usdt = address(0xdAC17F958D2ee523a2206206994597C13D831ec7);
+        ds.USDC = address(0x4Fabb145d64652a948d72533023f6E7A623C7C53);
+        ds.BTC = address(0xdAC17F958D2ee523a2206206994597C13D831ec7);
         return true;
     }
 
@@ -228,7 +228,7 @@ library LibMarketPlace {
         );
     }
 
-    function _PurchaseViaBusd(uint _ItemId) internal {
+    function _PurchaseViaUSDC(uint _ItemId) internal {
         MarketStorage storage ds = MarketSlot();
         if (ds.isCorrectId[_ItemId] == false) revert("INVALID ITEM ID");
         (
@@ -241,10 +241,10 @@ library LibMarketPlace {
             uint256 NftId
         ) = fetchItemDetails(_ItemId);
         if (isBougth) revert("ITEM ALREADY PURCHASED");
-        int priceInBusd = handleTokenTransfer(
+        int priceInUSDC = handleTokenTransfer(
             price,
-            ds.priceFeedBusd,
-            ds.Busd,
+            ds.priceFeedUSDC,
+            ds.USDC,
             seller
         );
         handleItemTransfer(
@@ -255,20 +255,20 @@ library LibMarketPlace {
             address(this),
             msg.sender,
             price,
-            uint(priceInBusd),
-            "BUSD"
+            uint(priceInUSDC),
+            "USDC"
         );
         emit ItemBougth(
             _ItemId,
             NftAddress,
-            priceInBusd,
+            priceInUSDC,
             seller,
             msg.sender,
-            "Busd"
+            "USDC"
         );
     }
 
-    function _purchaseViaUsdt(uint _ItemId) internal {
+    function _purchaseViaBTC(uint _ItemId) internal {
         MarketStorage storage ds = MarketSlot();
         if (ds.isCorrectId[_ItemId] == false) revert("INVALID ITEM ID");
         (
@@ -281,7 +281,7 @@ library LibMarketPlace {
             uint256 NftId
         ) = fetchItemDetails(_ItemId);
         if (isBougth) revert("ITEM ALREADY PURCHASED");
-        int mPrice = handleEthTransfer(price, ds.Usdt, seller);
+        int mPrice = handleEthTransfer(price, ds.BTC, seller);
         handleItemTransfer(
             _ItemId,
             NftAddress,
@@ -291,7 +291,7 @@ library LibMarketPlace {
             msg.sender,
             price,
             uint(mPrice),
-            "USDT"
+            "BTC"
         );
     }
 
@@ -301,7 +301,7 @@ library LibMarketPlace {
         address seller
     ) internal returns (int) {
         MarketStorage storage ds = MarketSlot();
-        int token2Price = (1e18 / getTokenLatestPrice(ds.priceFeedUsdt));
+        int token2Price = (1e18 / getTokenLatestPrice(ds.priceFeedBTC));
         int mPrice = (int(_price) * token2Price);
         bool sucess = IERC20(_token2Addr).transferFrom(msg.sender, seller, 10);
         require(sucess, "TOKEN TRANSFER ERROR");
@@ -348,7 +348,7 @@ library LibMarketPlace {
         );
     }
 
-    function _PurchaseViaUni(uint _ItemId) internal {
+    function _PurchaseViaLink(uint _ItemId) internal {
         MarketStorage storage ds = MarketSlot();
         if (ds.isCorrectId[_ItemId] == false) revert("INVALID ITEM ID");
         (
@@ -361,10 +361,10 @@ library LibMarketPlace {
             uint256 NftId
         ) = fetchItemDetails(_ItemId);
         if (isBougth) revert("ITEM ALREADY PURCHASED");
-        int priceInUni = handleTokenTransfer(
+        int priceInLink = handleTokenTransfer(
             price,
-            ds.priceFeedUni,
-            ds.Uni,
+            ds.priceFeedLink,
+            ds.Link,
             seller
         );
         handleItemTransfer(
@@ -375,16 +375,16 @@ library LibMarketPlace {
             address(this),
             msg.sender,
             price,
-            uint(priceInUni),
-            "UNI"
+            uint(priceInLink),
+            "Link"
         );
         emit ItemBougth(
             _ItemId,
             NftAddress,
-            priceInUni,
+            priceInLink,
             seller,
             msg.sender,
-            "UNI"
+            "Link"
         );
     }
 
@@ -428,7 +428,7 @@ library LibMarketPlace {
         priceInToken2 = (((int(price) * ethPrice) / token2Price) / 1e8);
     }
 
-    function _DisplayPriceInUni(
+    function _DisplayPriceInLink(
         uint _ItemId
     ) internal view returns (int priceInToken2) {
         MarketStorage storage ds = MarketSlot();
@@ -436,11 +436,11 @@ library LibMarketPlace {
         (bool isBougth, , uint256 price, , , , ) = fetchItemDetails(_ItemId);
         if (isBougth) revert("ITEM ALREADY PURCHASED");
         int ethPrice = getTokenLatestPrice(ds.priceFeedEth);
-        int token2Price = getTokenLatestPrice(ds.priceFeedUni);
+        int token2Price = getTokenLatestPrice(ds.priceFeedLink);
         priceInToken2 = (((int(price) * ethPrice) / token2Price) / 1e8);
     }
 
-    function _DisplayPriceInBusd(
+    function _DisplayPriceInUSDC(
         uint _ItemId
     ) internal view returns (int priceInToken2) {
         MarketStorage storage ds = MarketSlot();
@@ -448,7 +448,7 @@ library LibMarketPlace {
         (bool isBougth, , uint256 price, , , , ) = fetchItemDetails(_ItemId);
         if (isBougth) revert("ITEM ALREADY PURCHASED");
         int ethPrice = getTokenLatestPrice(ds.priceFeedEth);
-        int token2Price = getTokenLatestPrice(ds.priceFeedBusd);
+        int token2Price = getTokenLatestPrice(ds.priceFeedUSDC);
         priceInToken2 = (((int(price) * ethPrice) / token2Price) / 1e8);
     }
 

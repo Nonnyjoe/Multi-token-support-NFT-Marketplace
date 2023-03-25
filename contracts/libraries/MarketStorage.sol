@@ -29,13 +29,13 @@ struct MarketStorage {
     mapping(uint256 => ItemDetails) mItemDetails;
     AggregatorV3Interface priceFeedDai;
     AggregatorV3Interface priceFeedEth;
-    AggregatorV3Interface priceFeedUni;
-    AggregatorV3Interface priceFeedBusd;
-    AggregatorV3Interface priceFeedUsdt;
-    address Usdt;
-    address Uni;
+    AggregatorV3Interface priceFeedLink;
+    AggregatorV3Interface priceFeedUSDC;
+    AggregatorV3Interface priceFeedBTC;
+    address USDC;
+    address Link;
+    address BTC;
     address Dai;
-    address Busd;
     Counters.Counter _tokenIdCounter;
 }
 // }

@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "../libraries/LibMarketPlace.sol";
 import {LibDiamond} from "../libraries/LibDiamond.sol";
 
-contract MarketPlace {
+contract MarketplaceFacet {
     function ListItem(
         address _NftAddress,
         uint _NftId,
@@ -25,34 +25,36 @@ contract MarketPlace {
         LibMarketPlace._PurchaseViaDai(_ItemId);
     }
 
-    function PurchaseViaUsdt(uint _ItemId) external {
-        LibMarketPlace._purchaseViaUsdt(_ItemId);
+    function PurchaseViaBTC(uint _ItemId) external {
+        LibMarketPlace._purchaseViaBTC(_ItemId);
     }
 
-    function PurchaseViaBusd(uint _ItemId) external {
-        LibMarketPlace._PurchaseViaBusd(_ItemId);
+    function PurchaseViaUSDC(uint _ItemId) external {
+        LibMarketPlace._PurchaseViaUSDC(_ItemId);
     }
 
     function PurchaseViaEth(uint _ItemId) external payable {
         LibMarketPlace._PurchaseViaEth(_ItemId);
     }
 
-    function PurchaseViaUni(uint _ItemId) external payable {
-        LibMarketPlace._PurchaseViaUni(_ItemId);
+    function PurchaseViaLink(uint _ItemId) external payable {
+        LibMarketPlace._PurchaseViaLink(_ItemId);
     }
 
     function DisplayPriceInDai(uint _ItemId) external view returns (int price) {
         price = LibMarketPlace._DisplayPriceInDai(_ItemId);
     }
 
-    function DisplayPriceInUni(uint _ItemId) external view returns (int price) {
-        price = LibMarketPlace._DisplayPriceInUni(_ItemId);
-    }
-
-    function DisplayPriceInBusd(
+    function DisplayPriceInLink(
         uint _ItemId
     ) external view returns (int price) {
-        price = LibMarketPlace._DisplayPriceInBusd(_ItemId);
+        price = LibMarketPlace._DisplayPriceInLink(_ItemId);
+    }
+
+    function DisplayPriceInUSDC(
+        uint _ItemId
+    ) external view returns (int price) {
+        price = LibMarketPlace._DisplayPriceInUSDC(_ItemId);
     }
 
     function DisplayPriceInEth(
