@@ -1,4 +1,9 @@
+# LOUPER LINK
+
+[CLICK HERE TO SCAN CONTRACT ON LOUPER](https://louper.dev/diamond/0x158a895F317F304fEE044705B35d55E18943f0D9?network=goerli)
+
 [![Mentioned in Awesome Foundry](https://awesome.re/mentioned-badge-flat.svg)](https://github.com/crisgarner/awesome-foundry)
+
 # Foundry + Hardhat Diamonds
 
 This is a mimimal template for [Diamonds](https://github.com/ethereum/EIPs/issues/2535) which allows facet selectors to be generated on the go in solidity tests!
