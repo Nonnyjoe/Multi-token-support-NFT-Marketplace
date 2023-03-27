@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
-import "../libraries/MarketStorage.sol";
+// import "../libraries/MarketStorage.sol";
+import "./LibDiamond.sol";
+
 import "../../lib/openzeppelin-contracts/contracts/interfaces/IERC20.sol";
 import "../../lib/openzeppelin-contracts/contracts/interfaces/IERC721.sol";
 import "lib/openzeppelin-contracts/contracts/utils/Counters.sol";
@@ -41,7 +43,7 @@ library LibMarketPlace {
         uint _NftId,
         uint _price
     ) internal returns (uint) {
-        MarketStorage storage ds = MarketSlot();
+        LibDiamond.DiamondStorage storage ds = MarketSlot();
         uint256 ItemId = ds._tokenIdCounter.current();
         ds._tokenIdCounter.increment();
         prepareItem(ItemId, _NftAddress, _NftId, _price);
@@ -58,8 +60,8 @@ library LibMarketPlace {
         uint _price
     ) internal {
         IERC721(_NftAddress).transferFrom(msg.sender, address(this), _NftId);
-        MarketStorage storage ds = MarketSlot();
-        ds.MarketItem[_ItemId] = marketDetails({
+        LibDiamond.DiamondStorage storage ds = MarketSlot();
+        ds.MarketItem[_ItemId] = LibDiamond.marketDetails({
             isBougth: false,
             seller: msg.sender,
             price: _price,
@@ -67,14 +69,14 @@ library LibMarketPlace {
             amountBougth: 0,
             paymentToken: ""
         });
-        ds.mItemDetails[_ItemId] = ItemDetails({
+        ds.mItemDetails[_ItemId] = LibDiamond.ItemDetails({
             NftAddress: _NftAddress,
             NftId: _NftId
         });
     }
 
     function _TakeOffMarket(uint _ItemId) internal {
-        MarketStorage storage ds = MarketSlot();
+        LibDiamond.DiamondStorage storage ds = MarketSlot();
         if (ds.isCorrectId[_ItemId] == false) revert("INVALID ITEM ID");
         (
             bool isBougth,
@@ -113,9 +115,9 @@ library LibMarketPlace {
         uint256 _amountBougth,
         string memory _paymentToken
     ) internal {
-        MarketStorage storage ds = MarketSlot();
+        LibDiamond.DiamondStorage storage ds = MarketSlot();
         IERC721(_NftAddress).transferFrom(_from, _to, _NftId);
-        ds.MarketItem[_ItemId] = marketDetails({
+        ds.MarketItem[_ItemId] = LibDiamond.marketDetails({
             isBougth: true,
             seller: _currentOwner,
             price: _price,
@@ -140,7 +142,7 @@ library LibMarketPlace {
             uint256 NftId
         )
     {
-        MarketStorage storage ds = MarketSlot();
+        LibDiamond.DiamondStorage storage ds = MarketSlot();
         isBougth = ds.MarketItem[_ItemId].isBougth;
         seller = ds.MarketItem[_ItemId].seller;
         price = ds.MarketItem[_ItemId].price;
@@ -151,7 +153,7 @@ library LibMarketPlace {
     }
 
     function setUp() internal returns (bool) {
-        MarketStorage storage ds = MarketSlot();
+        LibDiamond.DiamondStorage storage ds = MarketSlot();
         ds.priceFeedDai = AggregatorV3Interface(
             0x0d79df66BE487753B02D015Fb622DED7f0E9798d
         );
@@ -184,11 +186,11 @@ library LibMarketPlace {
             ,
 
         ) = _pricefeed.latestRoundData();
-        return (price);
+        return (price / 1e8);
     }
 
     function _PurchaseViaDai(uint _ItemId) internal {
-        MarketStorage storage ds = MarketSlot();
+        LibDiamond.DiamondStorage storage ds = MarketSlot();
         if (ds.isCorrectId[_ItemId] == false) revert("INVALID ITEM ID");
         (
             bool isBougth,
@@ -229,7 +231,7 @@ library LibMarketPlace {
     }
 
     function _PurchaseViaUSDC(uint _ItemId) internal {
-        MarketStorage storage ds = MarketSlot();
+        LibDiamond.DiamondStorage storage ds = MarketSlot();
         if (ds.isCorrectId[_ItemId] == false) revert("INVALID ITEM ID");
         (
             bool isBougth,
@@ -269,7 +271,7 @@ library LibMarketPlace {
     }
 
     function _purchaseViaBTC(uint _ItemId) internal {
-        MarketStorage storage ds = MarketSlot();
+        LibDiamond.DiamondStorage storage ds = MarketSlot();
         if (ds.isCorrectId[_ItemId] == false) revert("INVALID ITEM ID");
         (
             bool isBougth,
@@ -300,7 +302,7 @@ library LibMarketPlace {
         address _token2Addr,
         address seller
     ) internal returns (int) {
-        MarketStorage storage ds = MarketSlot();
+        LibDiamond.DiamondStorage storage ds = MarketSlot();
         int token2Price = (1e18 / getTokenLatestPrice(ds.priceFeedBTC));
         int mPrice = (int(_price) * token2Price);
         bool sucess = IERC20(_token2Addr).transferFrom(msg.sender, seller, 10);
@@ -309,7 +311,7 @@ library LibMarketPlace {
     }
 
     function _PurchaseViaEth(uint _ItemId) internal {
-        MarketStorage storage ds = MarketSlot();
+        LibDiamond.DiamondStorage storage ds = MarketSlot();
         if (ds.isCorrectId[_ItemId] == false) revert("INVALID ITEM ID");
         (
             bool isBougth,
@@ -349,7 +351,7 @@ library LibMarketPlace {
     }
 
     function _PurchaseViaLink(uint _ItemId) internal {
-        MarketStorage storage ds = MarketSlot();
+        LibDiamond.DiamondStorage storage ds = MarketSlot();
         if (ds.isCorrectId[_ItemId] == false) revert("INVALID ITEM ID");
         (
             bool isBougth,
@@ -394,10 +396,10 @@ library LibMarketPlace {
         address _token2Addr,
         address seller
     ) internal returns (int) {
-        MarketStorage storage ds = MarketSlot();
+        LibDiamond.DiamondStorage storage ds = MarketSlot();
         int ethPrice = getTokenLatestPrice(ds.priceFeedEth);
         int token2Price = getTokenLatestPrice(_t2Aggregator);
-        int priceInToken2 = (((int(_price) * ethPrice) / token2Price) / 1e8);
+        int priceInToken2 = ((int(_price) * ethPrice) / token2Price);
         uint UserToken2Bal = IERC20(_token2Addr).balanceOf(msg.sender);
         // require(int(UserToken2Bal) >= priceInToken2, "INSUFFICIENT BALANCE");
         bool sucess = IERC20(_token2Addr).transferFrom(
@@ -410,7 +412,7 @@ library LibMarketPlace {
     }
 
     function _AdminWithdrawal(uint _ammount) internal {
-        MarketStorage storage ds = MarketSlot();
+        LibDiamond.DiamondStorage storage ds = MarketSlot();
         require(_ammount <= address(this).balance, "AMOUNT EXCEEDS BALANCE");
         (bool success, ) = ds.Moderator.call{value: _ammount}("");
         require(success, "TRANSFER ERROR");
@@ -419,7 +421,7 @@ library LibMarketPlace {
     function _DisplayPriceInDai(
         uint _ItemId
     ) internal view returns (int priceInToken2) {
-        MarketStorage storage ds = MarketSlot();
+        LibDiamond.DiamondStorage storage ds = MarketSlot();
         if (ds.isCorrectId[_ItemId] == false) revert("INVALID ITEM ID");
         (bool isBougth, , uint256 price, , , , ) = fetchItemDetails(_ItemId);
         if (isBougth) revert("ITEM ALREADY PURCHASED");
@@ -431,7 +433,7 @@ library LibMarketPlace {
     function _DisplayPriceInLink(
         uint _ItemId
     ) internal view returns (int priceInToken2) {
-        MarketStorage storage ds = MarketSlot();
+        LibDiamond.DiamondStorage storage ds = MarketSlot();
         if (ds.isCorrectId[_ItemId] == false) revert("INVALID ITEM ID");
         (bool isBougth, , uint256 price, , , , ) = fetchItemDetails(_ItemId);
         if (isBougth) revert("ITEM ALREADY PURCHASED");
@@ -443,7 +445,7 @@ library LibMarketPlace {
     function _DisplayPriceInUSDC(
         uint _ItemId
     ) internal view returns (int priceInToken2) {
-        MarketStorage storage ds = MarketSlot();
+        LibDiamond.DiamondStorage storage ds = MarketSlot();
         if (ds.isCorrectId[_ItemId] == false) revert("INVALID ITEM ID");
         (bool isBougth, , uint256 price, , , , ) = fetchItemDetails(_ItemId);
         if (isBougth) revert("ITEM ALREADY PURCHASED");
@@ -453,13 +455,17 @@ library LibMarketPlace {
     }
 
     function _DisplayPriceInEth(uint _ItemId) internal view returns (uint) {
-        MarketStorage storage ds = MarketSlot();
+        LibDiamond.DiamondStorage storage ds = MarketSlot();
         if (ds.isCorrectId[_ItemId] == false) revert("INVALID ITEM ID");
         (, , uint256 price, , , , ) = fetchItemDetails(_ItemId);
         return price;
     }
 
-    function MarketSlot() internal pure returns (MarketStorage storage ds) {
+    function MarketSlot()
+        internal
+        pure
+        returns (LibDiamond.DiamondStorage storage ds)
+    {
         assembly {
             ds.slot := 0
         }
