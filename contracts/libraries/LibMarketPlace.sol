@@ -201,7 +201,7 @@ library LibMarketPlace {
             address NftAddress,
             uint256 NftId
         ) = fetchItemDetails(_ItemId);
-        if (isBougth) revert("ITEM ALREADY PURCHASED");
+        if (isBougth) revert("ITEM ALREADY PURCHASED!");
         int priceInDai = handleTokenTransfer(
             price,
             ds.priceFeedDai,
